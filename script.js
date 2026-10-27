@@ -791,7 +791,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="form-group">
             <label for="modal-student-name" class="neo-label">SELECT BORROWER RECORD</label>
             <select id="modal-student-name" class="neo-input">
-              ${loans.map(l => `<option value="${escapeHTML(l.studentName)}">${escapeHTML(l.studentName)} (${escapeHTML(l.studentId)})</option>`).join('')}
+              ${loans.map(l => `<option value="${escapeHTML(l.studentName)}" data-student-id="${escapeHTML(l.studentId)}">${escapeHTML(l.studentName)} (${escapeHTML(l.studentId)})</option>`).join('')}
             </select>
           </div>
         `;
@@ -845,8 +845,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sNameInput = document.getElementById('modal-student-name');
     const sIdInput = document.getElementById('modal-student-id');
-    const studentName = sNameInput ? sNameInput.value.trim() : '';
-    const studentId = sIdInput ? sIdInput.value.trim().toUpperCase() : '';
+    let studentName = sNameInput ? sNameInput.value.trim() : '';
+    let studentId = sIdInput ? sIdInput.value.trim().toUpperCase() : '';
+
+    if (sNameInput && sNameInput.tagName === 'SELECT') {
+      const opt = sNameInput.options[sNameInput.selectedIndex];
+      if (opt && opt.dataset.studentId) {
+        studentId = opt.dataset.studentId;
+      }
+    }
 
     if (!studentName && activeModalAction !== 'return') {
       showToast('Please enter a student name.', 'alert');
@@ -862,14 +869,17 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ bookId: activeBook.id, studentId, studentName })
         });
-        const data = await res.json();
-        if (res.ok) {
+        const data = await res.json().catch(err => {
+          console.error('Failed to parse borrow JSON response:', err);
+          return null;
+        });
+        if (res.ok && data) {
           showToast(`✓ Loaned "${activeBook.title}" to ${studentName}!`, 'success');
           closeModal();
           await loadData();
         } else {
-          showToast(data.error || 'Failed to borrow book.', 'alert');
-          if (data.canQueue) {
+          showToast((data && data.error) || 'Failed to borrow book.', 'alert');
+          if (data && data.canQueue) {
             openModal('waitlist', activeBook);
           }
         }
@@ -877,15 +887,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch('/api/return', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bookId: activeBook.id, studentName })
+          body: JSON.stringify({ bookId: activeBook.id, studentName, studentId })
         });
-        const data = await res.json();
-        if (res.ok) {
+        const data = await res.json().catch(err => {
+          console.error('Failed to parse return JSON response:', err);
+          return null;
+        });
+        if (res.ok && data) {
           showToast(data.message || `✓ "${activeBook.title}" returned!`, 'success');
           closeModal();
           await loadData();
         } else {
-          showToast(data.error || 'Failed to return book.', 'alert');
+          showToast((data && data.error) || 'Failed to return book.', 'alert');
         }
       } else if (activeModalAction === 'waitlist') {
         const res = await fetch('/api/queue', {
@@ -893,15 +906,20 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ studentId, studentName, bookId: activeBook.id, wantsTitle: activeBook.title })
         });
+        const data = await res.json().catch(err => {
+          console.error('Failed to parse queue JSON response:', err);
+          return null;
+        });
         if (res.ok) {
           showToast(`✓ Added ${studentName} to FIFO waitlist for ${activeBook.id}!`, 'info');
           closeModal();
           await loadData();
         } else {
-          showToast('Failed to enqueue request.', 'alert');
+          showToast((data && data.error) || 'Failed to enqueue request.', 'alert');
         }
       }
-    } catch {
+    } catch (err) {
+      console.error('Modal form submission error:', err);
       showToast('Backend communication error. Please try again.', 'alert');
     } finally {
       modalSubmitBtn.disabled = false;
@@ -1047,16 +1065,25 @@ document.addEventListener('DOMContentLoaded', () => {
   serveNextBtn.addEventListener('click', async () => {
     serveNextBtn.disabled = true;
     try {
-      const res = await fetch('/api/queue/serve', { method: 'POST' });
-      const data = await res.json();
-      if (res.ok) {
+      const res = await fetch('/api/queue/serve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}'
+      });
+      const data = await res.json().catch(err => {
+        console.error('Failed to parse serve JSON response:', err);
+        return null;
+      });
+      if (res.ok && data) {
         showToast(`✓ ${data.message}`, 'success');
         await loadData();
       } else {
-        showToast(data.error || 'Could not serve request.', 'info');
+        const msg = (data && data.error) ? data.error : (data && data.message ? data.message : 'Could not serve request.');
+        showToast(msg, 'info');
       }
-    } catch {
-      showToast('Backend error when serving student.', 'alert');
+    } catch (err) {
+      console.error('Serve Next Student communication error:', err);
+      showToast('Backend communication error. Please try again.', 'alert');
     } finally {
       serveNextBtn.disabled = false;
     }

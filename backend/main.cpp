@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <signal.h>
@@ -70,6 +71,12 @@ static std::string readFileContents(const std::string& filepath) {
 
 static void sendHttpResponse(int client_fd, int statusCode, const std::string& statusText,
                              const std::string& contentType, const std::string& body) {
+    std::cout << " -> " << statusCode << " " << statusText;
+    if (statusCode >= 400 && !body.empty()) {
+        std::cout << " | " << body;
+    }
+    std::cout << std::endl;
+
     std::ostringstream response;
     response << "HTTP/1.1 " << statusCode << " " << statusText << "\r\n"
              << "Content-Type: " << contentType << "; charset=utf-8\r\n"
@@ -133,6 +140,12 @@ int main(int argc, char* argv[]) {
         socklen_t client_len = sizeof(client_addr);
         int client_fd = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
         if (client_fd < 0) continue;
+
+        // Set 4-second socket receive timeout to prevent hanging on slow/broken connections
+        struct timeval tv{};
+        tv.tv_sec = 4;
+        tv.tv_usec = 0;
+        setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
 
         std::string request = "";
         char buffer[4096];
@@ -198,6 +211,7 @@ int main(int argc, char* argv[]) {
         // ---------------------------------------------------------------------
         // REST API Routes
         // ---------------------------------------------------------------------
+        std::cout << "[HTTP] " << method << " " << path;
 
         if (method == "GET" && path == "/api/books") {
             sendHttpResponse(client_fd, 200, "OK", "application/json", library.getBooksJson());
@@ -224,10 +238,10 @@ int main(int argc, char* argv[]) {
             std::string errorMsg;
             if (library.addBook(newBook, errorMsg)) {
                 sendHttpResponse(client_fd, 201, "Created", "application/json",
-                                 "{\"message\":\"Book added successfully\",\"id\":\"" + id + "\"}");
+                                 "{\"message\":\"Book added successfully\",\"id\":\"" + escapeJson(id) + "\"}");
             } else {
                 sendHttpResponse(client_fd, 400, "Bad Request", "application/json",
-                                 "{\"error\":\"" + errorMsg + "\"}");
+                                 "{\"error\":\"" + escapeJson(errorMsg) + "\"}");
             }
         }
         else if (method == "DELETE" && path.rfind("/api/books/", 0) == 0) {
@@ -235,11 +249,11 @@ int main(int argc, char* argv[]) {
             std::string errorMsg;
             if (library.removeBook(id, errorMsg)) {
                 sendHttpResponse(client_fd, 200, "OK", "application/json",
-                                 "{\"message\":\"Book deleted successfully\",\"id\":\"" + id + "\"}");
+                                 "{\"message\":\"Book deleted successfully\",\"id\":\"" + escapeJson(id) + "\"}");
             } else {
                 int status = (errorMsg.find("not found") != std::string::npos) ? 404 : 400;
                 sendHttpResponse(client_fd, status, status == 404 ? "Not Found" : "Bad Request", "application/json",
-                                 "{\"error\":\"" + errorMsg + "\"}");
+                                 "{\"error\":\"" + escapeJson(errorMsg) + "\"}");
             }
         }
         else if (method == "GET" && path == "/api/stats") {
@@ -254,20 +268,20 @@ int main(int argc, char* argv[]) {
             if (library.borrowBook(bookId, studentId, studentName, err, canQueue)) {
                 sendHttpResponse(client_fd, 200, "OK", "application/json", "{\"message\":\"Book borrowed successfully\"}");
             } else {
-                std::string res = "{\"error\":\"" + err + "\",\"canQueue\":" + (canQueue ? "true" : "false") + "}";
+                std::string res = "{\"error\":\"" + escapeJson(err) + "\",\"canQueue\":" + (canQueue ? "true" : "false") + "}";
                 sendHttpResponse(client_fd, 400, "Bad Request", "application/json", res);
             }
         }
-        else if (method == "POST" && path == "/api/return") {
+        else if (method == "POST" && (path == "/api/return" || path == "/api/return/")) {
             std::string bookId = extractJsonString(body, "bookId");
             std::string studentName = extractJsonString(body, "studentName");
             std::string studentId = extractJsonString(body, "studentId");
             std::string studentInfo = !studentId.empty() ? studentId : studentName;
             std::string resultMsg, err;
             if (library.returnBook(bookId, studentInfo, resultMsg, err)) {
-                sendHttpResponse(client_fd, 200, "OK", "application/json", "{\"message\":\"" + resultMsg + "\"}");
+                sendHttpResponse(client_fd, 200, "OK", "application/json", "{\"message\":\"" + escapeJson(resultMsg) + "\"}");
             } else {
-                sendHttpResponse(client_fd, 400, "Bad Request", "application/json", "{\"error\":\"" + err + "\"}");
+                sendHttpResponse(client_fd, 400, "Bad Request", "application/json", "{\"error\":\"" + escapeJson(err) + "\"}");
             }
         }
         else if (method == "GET" && path == "/api/queue") {
@@ -288,15 +302,15 @@ int main(int argc, char* argv[]) {
             library.enqueueRequest({studentId, studentName, bookId, wantsTitle});
             sendHttpResponse(client_fd, 201, "Created", "application/json", "{\"message\":\"Request enqueued\"}");
         }
-        else if (method == "POST" && (path == "/api/queue/serve" || path == "/api/serve")) {
+        else if (method == "POST" && (path == "/api/queue/serve" || path == "/api/queue/serve/" || path == "/api/serve" || path == "/api/serve/")) {
             StudentRequest served;
             std::string resultMsg;
             if (library.serveNextRequest(served, resultMsg)) {
-                std::string res = "{\"message\":\"" + resultMsg + "\",\"studentName\":\"" + served.studentName +
-                                  "\",\"bookId\":\"" + served.bookId + "\"}";
+                std::string res = "{\"message\":\"" + escapeJson(resultMsg) + "\",\"studentName\":\"" + escapeJson(served.studentName) +
+                                  "\",\"bookId\":\"" + escapeJson(served.bookId) + "\"}";
                 sendHttpResponse(client_fd, 200, "OK", "application/json", res);
             } else {
-                sendHttpResponse(client_fd, 400, "Bad Request", "application/json", "{\"error\":\"" + resultMsg + "\"}");
+                sendHttpResponse(client_fd, 400, "Bad Request", "application/json", "{\"error\":\"" + escapeJson(resultMsg) + "\"}");
             }
         }
         else if (method == "GET" && path == "/api/returns") {

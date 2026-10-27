@@ -3,6 +3,22 @@
 
 #include "DataStructures.h"
 #include <string>
+#include <sstream>
+
+inline std::string escapeJson(const std::string& s) {
+    std::ostringstream o;
+    for (char c : s) {
+        if (c == '"') o << "\\\"";
+        else if (c == '\\') o << "\\\\";
+        else if (c == '\b') o << "\\b";
+        else if (c == '\f') o << "\\f";
+        else if (c == '\n') o << "\\n";
+        else if (c == '\r') o << "\\r";
+        else if (c == '\t') o << "\\t";
+        else o << c;
+    }
+    return o.str();
+}
 
 class Library {
 private:

@@ -2,25 +2,6 @@
 #include <sstream>
 #include <iomanip>
 
-static std::string escapeJson(const std::string& s) {
-    std::ostringstream o;
-    for (char c : s) {
-        if (c == '"') o << "\\\"";
-        else if (c == '\\') o << "\\\\";
-        else if (c == '\b') o << "\\b";
-        else if (c == '\f') o << "\\f";
-        else if (c == '\n') o << "\\n";
-        else if (c == '\r') o << "\\r";
-        else if (c == '\t') o << "\\t";
-        else if ('\x00' <= c && c <= '\x1f') {
-            o << "\\u" << std::hex << std::setw(4) << std::setfill('0') << (int)c;
-        } else {
-            o << c;
-        }
-    }
-    return o.str();
-}
-
 Library::Library() {
     // Starts completely empty: no mock or dummy records populated
 }
@@ -108,7 +89,7 @@ bool Library::borrowBook(const std::string& bookId, const std::string& studentId
 
     if (book->availableCopies <= 0) {
         canQueue = true;
-        errorMsg = "No copies of \"" + book->title + "\" are currently available.";
+        errorMsg = "No copies of '" + book->title + "' are currently available.";
         return false;
     }
 
@@ -134,7 +115,7 @@ bool Library::returnBook(const std::string& bookId, const std::string& studentIn
 
     if (!foundLoan) {
         if (!studentInfo.empty()) {
-            errorMsg = "Student \"" + studentInfo + "\" does not have [" + bookId + "] checked out.";
+            errorMsg = "Student '" + studentInfo + "' does not have [" + bookId + "] checked out.";
             return false;
         } else if (book->activeLoans.empty()) {
             errorMsg = "All copies of [" + bookId + "] are already returned to the shelf.";
@@ -157,7 +138,7 @@ bool Library::returnBook(const std::string& bookId, const std::string& studentIn
     record.coverStyle = book->coverStyle;
     returnStack.push(record);
 
-    resultMsg = "Book \"" + book->title + "\" successfully returned from " + loan.studentName + ".";
+    resultMsg = "Book '" + book->title + "' successfully returned from " + loan.studentName + ".";
 
     // FIFO Rule: Check if a waiting student in queue wants this returned book
     StudentRequest waitingReq;
@@ -185,7 +166,20 @@ bool Library::serveNextRequest(StudentRequest& outReq, std::string& resultMsg) {
         return false;
     }
 
-    // Find the first eligible request in FIFO order whose book has available copies
+    // Inspect next request in queue (FIFO front)
+    StudentRequest nextReq;
+    if (requestQueue.peek(nextReq)) {
+        Book* frontBook = findBook(nextReq.bookId);
+        if (frontBook && frontBook->availableCopies > 0) {
+            requestQueue.dequeue(outReq);
+            frontBook->availableCopies--;
+            frontBook->activeLoans.push_back({outReq.studentId, outReq.studentName});
+            resultMsg = "Served #" + outReq.studentId + " (" + outReq.studentName + ") and loaned [" + frontBook->id + "] " + frontBook->title;
+            return true;
+        }
+    }
+
+    // If front is not available, find the first request in FIFO order that can be served
     bool served = requestQueue.dequeueFirstMatching([&](const StudentRequest& r) {
         Book* b = findBook(r.bookId);
         return b && b->availableCopies > 0;
