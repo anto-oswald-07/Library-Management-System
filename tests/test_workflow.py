@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Step-by-step verification of all 10 User Workflows specified in Step 5:
-1. Open website & view dashboard
+1. Open website & view dashboard (starts clean with 0 dummy books)
 2. Add book & verify inventory
 3. Search by book ID and title
 4. Remove book & verify linked list + BST sync
@@ -10,7 +10,7 @@ Step-by-step verification of all 10 User Workflows specified in Step 5:
 7. Return borrowed book & verify return stack updates
 8. Process eligible waiting request when copy becomes available
 9. Open Console & verify all 4 structures reflect current data
-10. Restart backend & verify clean memory initialization
+10. Restart backend & verify clean memory initialization (0 records)
 """
 
 import subprocess
@@ -49,8 +49,8 @@ def run_workflow_test():
         assert status == 200 and "Library Management System" in html
         status, books_json = req("/api/books")
         books = json.loads(books_json)
-        assert len(books) == 5
-        print("✓ Scenario 1: Website loaded and initial catalog dashboard verified.")
+        assert len(books) == 0
+        print("✓ Scenario 1: Website loaded and verified initial empty catalog.")
 
         # Scenario 2: Add a book and verify it appears in inventory
         new_book = {
@@ -77,21 +77,23 @@ def run_workflow_test():
         print("✓ Scenario 3: Search by Book ID and Title verified.")
 
         # Scenario 4: Remove a book and verify linked list and BST stay synchronized
-        # Remove B-108 (which has no active loans and no pending queue)
-        status, del_res = req("/api/books/B-108", "DELETE")
+        # Add B-999 temporarily to delete
+        req("/api/books", "POST", {"id": "B-999", "title": "Temp", "author": "Author", "totalCopies": 1})
+        status, del_res = req("/api/books/B-999", "DELETE")
         assert status == 200
         # Check Linked List
         status, books_json = req("/api/books")
         books = json.loads(books_json)
-        assert not any(b["id"] == "B-108" for b in books)
+        assert not any(b["id"] == "B-999" for b in books)
         # Check BST In-order index
         status, struct_json = req("/api/structures")
         structures = json.loads(struct_json)
-        assert "B-108" not in structures["bst"]["inorder"]
-        print("✓ Scenario 4: Book B-108 removed; Linked List and BST verified synchronized.")
+        assert "B-999" not in structures["bst"]["inorder"]
+        print("✓ Scenario 4: Book removed; Linked List and BST verified synchronized.")
 
         # Scenario 5: Borrow an available book and verify its available-copy count decreases
-        # B-101 has 1 total, 1 available
+        # Add B-101: 1 total, 1 available
+        req("/api/books", "POST", {"id": "B-101", "title": "Everyday Things", "author": "Norman", "totalCopies": 1})
         status, borrow_res = req("/api/borrow", "POST", {"bookId": "B-101", "studentName": "Nikola Tesla"})
         assert status == 200
         status, b_json = req("/api/books/B-101")
@@ -110,7 +112,7 @@ def run_workflow_test():
             "studentId": "S-777",
             "studentName": "Marie Curie",
             "bookId": "B-101",
-            "wantsTitle": "The Design of Everyday Things"
+            "wantsTitle": "Everyday Things"
         })
         assert status == 201
         status, q_json = req("/api/queue")
@@ -129,17 +131,10 @@ def run_workflow_test():
         print("✓ Scenario 7: Returned B-101; LIFO Return Stack updated with top entry.")
 
         # Scenario 8: Process an eligible waiting request when a copy becomes available
-        # Verify Marie Curie was auto-allocated upon return, or serve another student
+        # Verify Marie Curie was auto-allocated upon return
         status, b_json = req("/api/books/B-101")
         b_101 = json.loads(b_json)
         assert b_101["borrower"] == "Marie Curie"
-        # Now test manual Serve Next Student on Julian Thorne waiting for B-102
-        # Return B-102 from Elena Rostova first
-        req("/api/return", "POST", {"bookId": "B-102", "studentName": "Elena Rostova"})
-        # Now Julian Thorne should receive it
-        status, b_102_json = req("/api/books/B-102")
-        b_102 = json.loads(b_102_json)
-        assert b_102["borrower"] == "Julian Thorne"
         print("✓ Scenario 8: Eligible waiting requests processed and allocated as copies freed.")
 
         # Scenario 9: Open the Data Structure Console and verify all four structures show current backend data
@@ -147,7 +142,7 @@ def run_workflow_test():
         structures = json.loads(s_json)
         assert "linkedList" in structures and len(structures["linkedList"]) > 0
         assert "queue" in structures
-        assert "stack" in structures and len(structures["stack"]) >= 2
+        assert "stack" in structures and len(structures["stack"]) >= 1
         assert "bst" in structures and len(structures["bst"]["inorder"]) > 0
         assert structures["bst"]["inorder"] == sorted(structures["bst"]["inorder"])
         print("✓ Scenario 9: Data Structure Console API exposes live linked list, queue, stack, and BST.")
@@ -157,7 +152,7 @@ def run_workflow_test():
         server.wait()
 
     # Scenario 10: Restart the backend and verify expected behavior for current storage model
-    print("[TEST] Restarting server to verify clean in-memory storage state...")
+    print("[TEST] Restarting server to verify clean in-memory storage state (zero dummy data)...")
     server2 = subprocess.Popen(["./libtrack_server", "8082"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     time.sleep(0.5)
     try:
@@ -166,17 +161,17 @@ def run_workflow_test():
                 return res.status, res.read().decode("utf-8")
         status, b_json = req2("/api/books")
         books = json.loads(b_json)
-        # Verify clean initial seed: 5 books
-        assert len(books) == 5
+        # Verify clean initial state: 0 books
+        assert len(books) == 0
         status, q_json = req2("/api/queue")
         q = json.loads(q_json)
-        # Verify clean initial seed: 2 queue requests
-        assert len(q) == 2
+        # Verify clean initial state: 0 queue requests
+        assert len(q) == 0
         status, ret_json = req2("/api/returns")
         rets = json.loads(ret_json)
-        # Verify clean initial seed: 2 returns
-        assert len(rets) == 2
-        print("✓ Scenario 10: Server restart verified clean in-memory initialization to seeded state.")
+        # Verify clean initial state: 0 returns
+        assert len(rets) == 0
+        print("✓ Scenario 10: Server restart verified clean in-memory initialization to 0 records.")
     finally:
         server2.terminate()
         server2.wait()

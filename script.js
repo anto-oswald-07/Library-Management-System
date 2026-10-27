@@ -7,22 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const state = {
     searchMode: 'title', // 'title' | 'id'
     searchQuery: '',
-    books: [
-      { id: 'B-101', title: 'The Design of Everyday Things', author: 'Don Norman', totalCopies: 1, availableCopies: 1, status: 'AVAILABLE', borrower: '', coverStyle: 1, activeLoans: [] },
-      { id: 'B-102', title: 'Structure and Interpretation of Com...', author: 'Harold Abelson', totalCopies: 1, availableCopies: 0, status: 'BORROWED', borrower: 'Elena Rostova', coverStyle: 2, activeLoans: [{ studentId: 'S-101', studentName: 'Elena Rostova' }] },
-      { id: 'B-103', title: 'Clean Code: A Handbook of Agile Craft', author: 'Robert C. Martin', totalCopies: 1, availableCopies: 1, status: 'AVAILABLE', borrower: '', coverStyle: 3, activeLoans: [] },
-      { id: 'B-104', title: 'Introduction to Algorithms (CLRS)', author: 'Thomas H. Cormen', totalCopies: 1, availableCopies: 0, status: 'BORROWED', borrower: 'Marcus Vance', coverStyle: 4, activeLoans: [{ studentId: 'S-103', studentName: 'Marcus Vance' }] },
-      { id: 'B-105', title: 'Graphic Storytelling & Visual Narrative', author: 'Will Eisner', totalCopies: 2, availableCopies: 2, status: 'AVAILABLE', borrower: '', coverStyle: 5, activeLoans: [] }
-    ],
-    queue: [
-      { rank: 1, studentId: 'S-101', studentName: 'Elena Rostova', bookId: 'B-104', wantsTitle: 'Introduction to Algorithms (CLRS)' },
-      { rank: 2, studentId: 'S-102', studentName: 'Julian Thorne', bookId: 'B-102', wantsTitle: 'Structure and Interpretation of Comp...' }
-    ],
-    recentlyReturned: [
-      { id: 'B-106', bookId: 'B-106', title: 'Refactoring: Improving Existing Code', studentName: 'Elena Rostova', coverStyle: 2, isTop: true, timeAgo: 'Just now' },
-      { id: 'B-107', bookId: 'B-107', title: 'Designing Data-Intensive Applications', studentName: 'Julian Thorne', coverStyle: 1, isTop: false, timeAgo: '45 mins ago' }
-    ],
-    stats: { totalBooks: 5, totalCopies: 6, availableCopies: 4, borrowedCopies: 2, pendingRequests: 2, recentReturns: 2 },
+    books: [],
+    queue: [],
+    recentlyReturned: [],
+    stats: { totalBooks: 0, totalCopies: 0, availableCopies: 0, borrowedCopies: 0, pendingRequests: 0, recentReturns: 0 },
     apiConnected: false
   };
 
@@ -600,11 +588,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.searchQuery.trim()) {
       shelfCountBadge.textContent = `${filtered.length} of ${state.books.length} Books`;
     } else {
-      shelfCountBadge.textContent = `${state.stats.totalBooks} Titles • ${state.stats.availableCopies} Avail / ${state.stats.borrowedCopies} Loaned`;
+      if (state.books.length === 0) {
+        shelfCountBadge.textContent = '0 Books';
+      } else {
+        shelfCountBadge.textContent = `${state.stats.totalBooks} Titles • ${state.stats.availableCopies} Avail / ${state.stats.borrowedCopies} Loaned`;
+      }
     }
 
     if (filtered.length === 0) {
       bookListContainer.innerHTML = '';
+      const emptyTitle = noBooksState.querySelector('.empty-state-title');
+      const emptyDesc = noBooksState.querySelector('.empty-state-desc');
+      if (state.books.length === 0) {
+        if (emptyTitle) emptyTitle.textContent = 'No books in the library yet';
+        if (emptyDesc) emptyDesc.textContent = 'Use the "+ Add a Book" form on the right to register your first volume.';
+        if (resetSearchBtn) resetSearchBtn.classList.add('hidden');
+      } else {
+        if (emptyTitle) emptyTitle.textContent = 'No books match your search';
+        if (emptyDesc) emptyDesc.textContent = 'Try searching with a different title keyword or book ID.';
+        if (resetSearchBtn) resetSearchBtn.classList.remove('hidden');
+      }
       noBooksState.classList.remove('hidden');
       return;
     }
@@ -660,7 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
     serveNextBtn.disabled = state.queue.length === 0;
 
     if (state.queue.length === 0) {
-      queueListContainer.innerHTML = '<div class="empty-state" style="padding: 14px; background: rgba(255,255,255,0.7);"><p class="empty-state-desc" style="margin:0;">No students waiting in queue.</p></div>';
+      queueListContainer.innerHTML = '<div class="empty-state" style="padding: 14px; background: rgba(255,255,255,0.7);"><p class="empty-state-desc" style="margin:0; font-weight:600; color:var(--ink-black);">No pending requests</p></div>';
       return;
     }
 
@@ -683,7 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderReturns() {
     returnsCountBadge.textContent = `${state.recentlyReturned.length} in Stack`;
     if (state.recentlyReturned.length === 0) {
-      returnsListContainer.innerHTML = '<div class="empty-state" style="padding: 14px; background: rgba(255,255,255,0.7);"><p class="empty-state-desc" style="margin:0; color:#111;">No recently returned books.</p></div>';
+      returnsListContainer.innerHTML = '<div class="empty-state" style="padding: 14px; background: rgba(255,255,255,0.7);"><p class="empty-state-desc" style="margin:0; color:#111; font-weight:600;">No books returned yet</p></div>';
       return;
     }
 

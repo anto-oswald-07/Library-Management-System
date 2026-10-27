@@ -289,7 +289,7 @@
               <span class="red-bullet" aria-hidden="true"></span>
               <h2 class="panel-title">Books On Shelf</h2>
             </div>
-            <div class="count-pill" id="shelf-count-badge">5 Books</div>
+            <div class="count-pill" id="shelf-count-badge">0 Books</div>
           </div>
 
           <!-- Book Cards Container -->
@@ -300,8 +300,8 @@
           <!-- Empty search result state -->
           <div id="no-books-state" class="empty-state hidden">
             <div class="empty-state-icon">📚</div>
-            <p class="empty-state-title">No books match your search</p>
-            <p class="empty-state-desc">Try searching with a different title keyword or book ID.</p>
+            <p class="empty-state-title">No books in the library yet</p>
+            <p class="empty-state-desc">Use the "+ Add a Book" form on the right to register your first volume.</p>
             <button type="button" id="reset-search-btn" class="neo-btn btn-secondary">Reset Search Filter</button>
           </div>
         </div>
@@ -325,7 +325,7 @@
                   type="text" 
                   id="book-id-input" 
                   class="neo-input text-upper" 
-                  placeholder="B-105" 
+                  placeholder="e.g. B-101" 
                   required
                   maxlength="10"
                 >
@@ -387,7 +387,7 @@
               </svg>
               <h2 class="panel-title">Waiting Queue</h2>
             </div>
-            <div class="count-pill pill-subtle" id="queue-count-badge">2 Enqueued</div>
+            <div class="count-pill pill-subtle" id="queue-count-badge">0 Enqueued</div>
           </div>
 
           <!-- Serve Next Student Action Button -->
@@ -408,7 +408,7 @@
               <span class="currency-glyph" aria-hidden="true">$</span>
               <h2 class="panel-title text-white">Recently Returned</h2>
             </div>
-            <div class="count-pill pill-subtle-white" id="returns-count-badge">2 in Stack</div>
+            <div class="count-pill pill-subtle-white" id="returns-count-badge">0 in Stack</div>
           </div>
           <p class="panel-instruction text-cream-mono">
             LIFO Return Stack — latest dropped books stacked on top.

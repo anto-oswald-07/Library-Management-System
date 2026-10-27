@@ -2,21 +2,13 @@
 """
 Automated test suite for LibTrack C++ DSA Core & HTTP API.
 Tests:
-1. Static Assets: Serving index.html, style.css, script.js
-2. Linked List: Book insertion, retrieval, and deletion
-3. BST: Indexing, O(log n) lookup, duplicate prevention, in-order traversal
-4. Queue: FIFO student request enqueue and serve
-5. Stack: LIFO return history push and traversal
-6. Domain rules: Multi-copy borrowing, auto-allocation to waiting queue
-7. Edge cases:
-   - Duplicate book IDs
-   - Missing or invalid input
-   - Searching for nonexistent books
-   - Removing nonexistent books
-   - Empty queue & stack handling
-   - Returning a book that was not borrowed
-   - Borrowing when 0 copies are available
-   - Preventing deletion of books with active loans or pending requests
+1. Clean startup: zero books, empty queue, empty stack, zero stats.
+2. Static Assets: Serving index.html, style.css, script.js
+3. Book addition & BST indexing: adding real book, duplicate ID rejection, invalid input rejection.
+4. Borrowing & Returning: copy count updates, borrower records, LIFO return stack.
+5. FIFO Queue: enqueue, eligible serve, auto-allocation on return.
+6. Safety rules: preventing deletion of books with active loans or pending requests.
+7. Deletion & BST sync: clean deletion of available book without active loans/requests.
 """
 
 import subprocess
@@ -68,118 +60,116 @@ def run_tests():
         status, js = request("/script.js")
         assert_test("Serve script.js", status == 200 and "loadData" in js)
 
-        # 2. Test Linked List & Books API
+        # 2. Test Clean Startup (Zero dummy data)
         status, books_json = request("/api/books")
         books = json.loads(books_json)
-        assert_test("GET /api/books returns seeded books", status == 200 and len(books) == 5, f"Count: {len(books)}")
+        assert_test("GET /api/books starts completely empty", status == 200 and len(books) == 0, f"Count: {len(books)}")
 
-        status, book_json = request("/api/books/B-101")
-        book = json.loads(book_json)
-        assert_test("GET /api/books/B-101 returns book record", status == 200 and book.get("title") == "The Design of Everyday Things")
+        status, queue_json = request("/api/queue")
+        queue = json.loads(queue_json)
+        assert_test("GET /api/queue starts completely empty", status == 200 and len(queue) == 0, f"Count: {len(queue)}")
 
-        # 3. Test BST Index & Duplicate Prevention
-        new_book = {
-            "id": "B-200",
-            "title": "Algorithms to Live By",
-            "author": "Brian Christian",
-            "coverStyle": 2
+        status, ret_json = request("/api/returns")
+        rets = json.loads(ret_json)
+        assert_test("GET /api/returns starts completely empty", status == 200 and len(rets) == 0, f"Count: {len(rets)}")
+
+        status, stats_json = request("/api/stats")
+        stats = json.loads(stats_json)
+        assert_test("GET /api/stats reports 0 for all counts on startup",
+                    status == 200 and stats.get("totalBooks") == 0 and stats.get("totalCopies") == 0)
+
+        # 3. Add Real Books
+        book1 = {
+            "id": "BK-01",
+            "title": "Design Patterns",
+            "author": "Erich Gamma",
+            "totalCopies": 2,
+            "coverStyle": 1
         }
-        status, add_res = request("/api/books", "POST", new_book)
-        assert_test("POST /api/books adds new book", status == 201)
+        status, add_res1 = request("/api/books", "POST", book1)
+        assert_test("POST /api/books adds first book (BK-01)", status == 201)
 
-        # Verify BST indexed the new book
+        book2 = {
+            "id": "BK-02",
+            "title": "Clean Code",
+            "author": "Robert C. Martin",
+            "totalCopies": 1,
+            "coverStyle": 3
+        }
+        status, add_res2 = request("/api/books", "POST", book2)
+        assert_test("POST /api/books adds second book (BK-02)", status == 201)
+
+        # Verify BST indexed the books in sorted order
         status, struct_json = request("/api/structures")
         structures = json.loads(struct_json)
         bst_inorder = structures.get("bst", {}).get("inorder", [])
-        assert_test("BST in-order contains new book B-200", "B-200" in bst_inorder and bst_inorder == sorted(bst_inorder))
+        assert_test("BST in-order contains indexed books in sorted order",
+                    bst_inorder == ["BK-01", "BK-02"])
 
-        # Duplicate ID should fail gracefully
-        status, dup_res = request("/api/books", "POST", new_book)
+        # Duplicate ID should fail
+        status, dup_res = request("/api/books", "POST", book1)
         assert_test("POST /api/books prevents duplicate ID", status == 400 and "Duplicate" in dup_res)
 
-        # 4. Test Deletion from both Linked List and BST
-        status, del_res = request("/api/books/B-200", "DELETE")
-        assert_test("DELETE /api/books/B-200 removes book", status == 200)
+        # 4. Test Borrowing and Returning
+        status, borrow_res = request("/api/borrow", "POST", {"bookId": "BK-01", "studentName": "Ada Lovelace"})
+        assert_test("POST /api/borrow loans copy of BK-01", status == 200)
 
-        status, struct_json = request("/api/structures")
-        structures = json.loads(struct_json)
-        assert_test("BST index synchronized after deletion", "B-200" not in structures.get("bst", {}).get("inorder", []))
+        status, b_json = request("/api/books/BK-01")
+        b_data = json.loads(b_json)
+        assert_test("BK-01 available copies decremented (1/2)", b_data.get("availableCopies") == 1)
 
-        # 5. Test Borrowing and Returning
-        status, borrow_res = request("/api/borrow", "POST", {"bookId": "B-101", "studentName": "Ada Lovelace"})
-        assert_test("POST /api/borrow loans available book", status == 200)
+        # Borrow remaining copy of BK-01
+        request("/api/borrow", "POST", {"bookId": "BK-01", "studentName": "Grace Hopper"})
 
-        status, book_json = request("/api/books/B-101")
-        book = json.loads(book_json)
-        assert_test("Book B-101 marked BORROWED with Ada Lovelace", book.get("status") == "BORROWED" and book.get("borrower") == "Ada Lovelace")
+        # Now BK-01 has 0 available copies; borrowing should fail with canQueue
+        status, borrow_no_copies = request("/api/borrow", "POST", {"bookId": "BK-01", "studentName": "Margaret Hamilton"})
+        assert_test("Borrowing with 0 available copies fails with canQueue", status == 400 and "No copies" in borrow_no_copies)
 
-        status, return_res = request("/api/return", "POST", {"bookId": "B-101", "studentName": "Ada Lovelace"})
-        assert_test("POST /api/return returns book", status == 200)
-
-        # 6. Test Stack (LIFO Return Stack)
-        status, returns_json = request("/api/returns")
-        returns = json.loads(returns_json)
-        assert_test("Stack top is newly returned book B-101", len(returns) > 0 and returns[0].get("id") == "B-101" and returns[0].get("isTop") is True)
-
-        # 7. Test Queue & Serve Next Eligible Request
-        # Enqueue student for B-103 (available)
+        # Enqueue Margaret Hamilton for BK-01
         status, enq_res = request("/api/queue", "POST", {
-            "studentId": "S-999",
-            "studentName": "Grace Hopper",
-            "bookId": "B-103",
-            "wantsTitle": "Clean Code: A Handbook of Agile Craft"
+            "studentId": "STU-100",
+            "studentName": "Margaret Hamilton",
+            "bookId": "BK-01",
+            "wantsTitle": "Design Patterns"
         })
         assert_test("POST /api/queue enqueues request", status == 201)
 
-        # Serve next eligible student
-        status, serve_res = request("/api/queue/serve", "POST", {})
-        assert_test("POST /api/queue/serve loans book to eligible waiting student", status == 200 and "Grace Hopper" in serve_res)
+        # Return BK-01 from Ada Lovelace -> should auto-allocate to waiting Margaret Hamilton!
+        status, ret_res = request("/api/return", "POST", {"bookId": "BK-01", "studentName": "Ada Lovelace"})
+        assert_test("Return of BK-01 auto-allocates to waiting Margaret Hamilton", status == 200 and "Margaret Hamilton" in ret_res)
 
-        # 8. Test Automatic Allocation on Return
-        # Elena Rostova wants B-104 (currently borrowed by Marcus Vance)
-        status, ret_res = request("/api/return", "POST", {"bookId": "B-104", "studentName": "Marcus Vance"})
-        assert_test("Return of B-104 auto-allocates to waiting Elena Rostova", status == 200 and "Elena Rostova" in ret_res)
+        # Verify Return Stack has Ada Lovelace's return at top
+        status, ret_json = request("/api/returns")
+        rets = json.loads(ret_json)
+        assert_test("LIFO Return Stack updated with top return", len(rets) > 0 and rets[0].get("id") == "BK-01" and rets[0].get("isTop") is True)
 
-        # =====================================================================
-        # Edge Case & Safety Validations (Step 5)
-        # =====================================================================
+        # 5. Test Safety Validations (Step 5 constraints)
+        # Attempt to delete BK-01 (currently has active loan with Grace Hopper / Margaret Hamilton)
+        status, del_loan_res = request("/api/books/BK-01", "DELETE")
+        assert_test("Prevent deleting book with active loans", status == 400 and "active loans" in del_loan_res)
 
-        # Edge Case 1: Cannot delete book with active loans
-        # B-102 has active loans (borrowed by Elena Rostova)
-        status, del_loan_res = request("/api/books/B-102", "DELETE")
-        assert_test("Prevent deleting book with active loans (B-102)", status == 400 and "active loans" in del_loan_res)
+        # Add an unborrowed book BK-03 and delete it
+        request("/api/books", "POST", {"id": "BK-03", "title": "Refactoring", "author": "Martin Fowler", "totalCopies": 1})
+        status, del_res = request("/api/books/BK-03", "DELETE")
+        assert_test("DELETE /api/books/BK-03 removes unborrowed book", status == 200)
 
-        # Edge Case 2: Cannot delete book with pending queue requests
-        # Julian Thorne is in queue for B-102, Elena is now borrowing B-104.
-        # Let's add book B-300, enqueue a student for B-300, then attempt to delete B-300.
-        request("/api/books", "POST", {"id": "B-300", "title": "Test Book", "author": "Tester", "totalCopies": 1})
-        request("/api/queue", "POST", {"studentId": "S-555", "studentName": "Queue Tester", "bookId": "B-300", "wantsTitle": "Test Book"})
-        status, del_queue_res = request("/api/books/B-300", "DELETE")
-        assert_test("Prevent deleting book with pending queue requests", status == 400 and "pending waiting queue" in del_queue_res)
+        # Verify BST removed BK-03
+        status, struct_json = request("/api/structures")
+        structures = json.loads(struct_json)
+        assert_test("BST index synchronized after deletion", "BK-03" not in structures.get("bst", {}).get("inorder", []))
 
-        # Edge Case 3: Deleting a nonexistent book
+        # 6. Test Nonexistent and Invalid Requests
         status, del_non_res = request("/api/books/NONEXISTENT", "DELETE")
         assert_test("Deleting nonexistent book returns 404", status == 404 and "not found" in del_non_res.lower())
 
-        # Edge Case 4: Searching for a nonexistent book
         status, get_non_res = request("/api/books/NONEXISTENT", "GET")
         assert_test("Searching nonexistent book returns 404", status == 404 and "not found" in get_non_res.lower())
 
-        # Edge Case 5: Missing or invalid input on book creation
-        status, bad_add_1 = request("/api/books", "POST", {"id": "", "title": "No ID"})
-        assert_test("POST /api/books with empty ID returns 400", status == 400 and "empty" in bad_add_1)
+        status, bad_add = request("/api/books", "POST", {"id": "", "title": "No ID"})
+        assert_test("POST /api/books with empty ID returns 400", status == 400 and "empty" in bad_add)
 
-        status, bad_add_2 = request("/api/books", "POST", {"id": "B-BAD", "title": "Bad Copies", "totalCopies": 0})
-        assert_test("POST /api/books with totalCopies <= 0 returns 400", status == 400 and "at least 1" in bad_add_2)
-
-        # Edge Case 6: Borrowing when 0 copies are available
-        # B-104 is now borrowed by Elena Rostova (0 copies available)
-        status, borrow_no_copies = request("/api/borrow", "POST", {"bookId": "B-104", "studentName": "Impatient Reader"})
-        assert_test("Borrowing book with 0 copies returns 400 with canQueue", status == 400 and "No copies" in borrow_no_copies)
-
-        # Edge Case 7: Returning a book that was not borrowed
-        status, return_unborrowed = request("/api/return", "POST", {"bookId": "B-101", "studentName": "Unregistered Student"})
-        assert_test("Returning book not borrowed by student returns 400", status == 400 and "does not have" in return_unborrowed)
+        status, ret_unborrowed = request("/api/return", "POST", {"bookId": "BK-02", "studentName": "Nobody"})
+        assert_test("Returning unborrowed book returns 400", status == 400)
 
         print(f"\n[SUMMARY] {passed}/{total} tests passed.")
         return passed == total

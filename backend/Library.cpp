@@ -22,33 +22,11 @@ static std::string escapeJson(const std::string& s) {
 }
 
 Library::Library() {
-    seedSampleData();
+    // Starts completely empty: no mock or dummy records populated
 }
 
 void Library::seedSampleData() {
-    std::string err;
-    // B-101: 1 copy, available
-    addBook({"B-101", "The Design of Everyday Things", "Don Norman", 1, 1, {}, 1}, err);
-
-    // B-102: 1 copy, borrowed by Elena Rostova
-    addBook({"B-102", "Structure and Interpretation of Com...", "Harold Abelson", 1, 0, {{"S-101", "Elena Rostova"}}, 2}, err);
-
-    // B-103: 1 copy, available
-    addBook({"B-103", "Clean Code: A Handbook of Agile Craft", "Robert C. Martin", 1, 1, {}, 3}, err);
-
-    // B-104: 1 copy, borrowed by Marcus Vance
-    addBook({"B-104", "Introduction to Algorithms (CLRS)", "Thomas H. Cormen", 1, 0, {{"S-103", "Marcus Vance"}}, 4}, err);
-
-    // B-105: 2 copies, 2 available
-    addBook({"B-105", "Graphic Storytelling & Visual Narrative", "Will Eisner", 2, 2, {}, 5}, err);
-
-    // Seed FIFO Queue
-    enqueueRequest({"S-101", "Elena Rostova", "B-104", "Introduction to Algorithms (CLRS)"});
-    enqueueRequest({"S-102", "Julian Thorne", "B-102", "Structure and Interpretation of Comp..."});
-
-    // Seed LIFO Return Stack
-    returnStack.push({"B-107", "Designing Data-Intensive Applications", "Julian Thorne", "45 mins ago", 1});
-    returnStack.push({"B-106", "Refactoring: Improving Existing Code", "Elena Rostova", "Just now", 2});
+    // No-op: Startup starts with clean, empty data structures
 }
 
 bool Library::addBook(const Book& book, std::string& errorMsg) {
