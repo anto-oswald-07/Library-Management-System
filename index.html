@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LibTrack — Library Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..800;1,9..40,400..800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="site-wrapper">
+    <!-- Header Card -->
+    <header class="main-header neo-card">
+      <div class="header-illustration" aria-hidden="true">
+        <!-- Handcrafted Retro Bookshelf & Hanging Plant SVG -->
+        <svg viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet" class="bookshelf-svg">
+          <!-- Warm Wall Background -->
+          <rect x="0" y="0" width="1000" height="220" fill="#f7efe0"/>
+
+          <!-- Bookshelf Board (wood plank) sitting nicely in bottom third of illustration -->
+          <rect x="220" y="146" width="760" height="14" rx="2" fill="#d8b28a" stroke="#181818" stroke-width="2.5"/>
+          <path d="M 220,160 L 980,160 L 970,168 L 228,168 Z" fill="#b98f65" stroke="#181818" stroke-width="1.2"/>
+
+          <!-- Shelf support brackets underneath -->
+          <path d="M 330,160 L 330,192 L 354,160 Z" fill="#7d4d2b" stroke="#181818" stroke-width="2.2"/>
+          <path d="M 870,160 L 870,192 L 894,160 Z" fill="#7d4d2b" stroke="#181818" stroke-width="2.2"/>
+
+          <!-- Top Hanging Ticket Bookmark: ★ ARCHIVE NO. 42 ★ -->
+          <g transform="translate(436, 0)">
+            <rect x="0" y="0" width="125" height="22" fill="#faea9d" stroke="#181818" stroke-width="2"/>
+            <text x="12" y="15" font-family="'Space Mono', monospace" font-size="9" font-weight="bold" fill="#181818">★ ARCHIVE NO. 42 ★</text>
+          </g>
+
+          <!-- ================= BOOKS ON SHELF ================= -->
+          <!-- Book 1: Olive green slanted book -->
+          <g transform="translate(290, 146) rotate(-7)">
+            <rect x="-26" y="-115" width="28" height="115" rx="3" fill="#527953" stroke="#181818" stroke-width="2.5"/>
+            <text x="-12" y="-45" fill="#fcfbf7" font-family="'Space Mono', monospace" font-size="11" font-weight="bold" transform="rotate(-90, -12, -45)">ruoks</text>
+            <line x1="-26" y1="-102" x2="2" y2="-102" stroke="#2d4a2e" stroke-width="2"/>
+            <line x1="-26" y1="-95" x2="2" y2="-95" stroke="#2d4a2e" stroke-width="2"/>
+          </g>
+
+          <!-- Book 2: Terracotta / Coral book "dain" -->
+          <g transform="translate(305, 146)">
+            <rect x="0" y="-120" width="34" height="120" rx="2" fill="#d95d39" stroke="#181818" stroke-width="2.5"/>
+            <line x1="8" y1="-120" x2="8" y2="0" stroke="#a33618" stroke-width="2"/>
+            <text x="23" y="-50" fill="#ffffff" font-family="'Space Mono', monospace" font-size="12" font-weight="bold" transform="rotate(-90, 23, -50)">dain</text>
+            <circle cx="17" cy="-15" r="4" fill="#faea9d"/>
+          </g>
+
+          <!-- Book 3: Sage green book with leaf vine spine -->
+          <g transform="translate(345, 146)">
+            <rect x="0" y="-125" width="40" height="125" rx="2" fill="#84a98c" stroke="#181818" stroke-width="2.5"/>
+            <!-- Vine pattern -->
+            <path d="M 20,-15 L 20,-110" stroke="#283618" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M 20,-30 Q 30,-36 26,-42 Q 20,-39 20,-36" fill="#283618"/>
+            <path d="M 20,-33 Q 10,-39 14,-45 Q 20,-42 20,-39" fill="#283618"/>
+            <path d="M 20,-55 Q 30,-61 26,-67 Q 20,-64 20,-61" fill="#283618"/>
+            <path d="M 20,-58 Q 10,-64 14,-70 Q 20,-67 20,-64" fill="#283618"/>
+            <path d="M 20,-80 Q 30,-86 26,-92 Q 20,-89 20,-86" fill="#283618"/>
+            <path d="M 20,-83 Q 10,-89 14,-95 Q 20,-92 20,-89" fill="#283618"/>
+          </g>
+
+          <!-- Book 4: Mustard yellow book -->
+          <g transform="translate(391, 146)">
+            <rect x="0" y="-116" width="30" height="116" rx="2" fill="#e9c46a" stroke="#181818" stroke-width="2.5"/>
+            <rect x="5" y="-105" width="20" height="18" fill="#f4a261" stroke="#181818" stroke-width="1.5"/>
+            <line x1="5" y1="-20" x2="25" y2="-20" stroke="#181818" stroke-width="2"/>
+            <line x1="5" y1="-14" x2="25" y2="-14" stroke="#181818" stroke-width="2"/>
+          </g>
+
+          <!-- Book 5: Dark forest green book with framed label -->
+          <g transform="translate(427, 146)">
+            <rect x="0" y="-128" width="46" height="128" rx="2" fill="#2d6a4f" stroke="#181818" stroke-width="2.5"/>
+            <rect x="7" y="-120" width="32" height="112" fill="none" stroke="#74c69d" stroke-width="1.5" stroke-dasharray="4,4"/>
+            <circle cx="23" cy="-64" r="8" fill="#f4a261" stroke="#181818" stroke-width="1.5"/>
+          </g>
+
+          <!-- Book 6: Salmon pink/coral book "notes" -->
+          <g transform="translate(479, 146)">
+            <rect x="0" y="-122" width="34" height="122" rx="2" fill="#e76f51" stroke="#181818" stroke-width="2.5"/>
+            <ellipse cx="17" cy="-95" rx="9" ry="6" fill="#f4a261" stroke="#181818" stroke-width="1.5"/>
+            <text x="22" y="-36" fill="#ffffff" font-family="'Space Mono', monospace" font-size="11" transform="rotate(-90, 22, -36)">notes</text>
+          </g>
+
+          <!-- Book 7: Light blue/turquoise book "book" -->
+          <g transform="translate(519, 146)">
+            <rect x="0" y="-132" width="40" height="132" rx="2" fill="#4ea8de" stroke="#181818" stroke-width="2.5"/>
+            <text x="25" y="-50" fill="#ffffff" font-family="'Space Mono', monospace" font-size="12" font-weight="bold" transform="rotate(-90, 25, -50)">book</text>
+            <rect x="6" y="-115" width="28" height="9" fill="#f1faee" stroke="#181818" stroke-width="1.5"/>
+          </g>
+
+          <!-- Paper sticker on Book 7: "hand-letter" -->
+          <g transform="translate(535, 96)">
+            <rect x="0" y="0" width="44" height="24" rx="2" fill="#fdf6db" stroke="#181818" stroke-width="1.8"/>
+            <text x="5" y="11" font-family="'Space Mono', monospace" font-size="8" font-weight="bold" fill="#4a3e2f">hand-</text>
+            <text x="5" y="20" font-family="'Space Mono', monospace" font-size="8" font-weight="bold" fill="#4a3e2f">letter</text>
+          </g>
+
+          <!-- Book 8: Ochre chevron book "T: JEOIK" -->
+          <g transform="translate(565, 146)">
+            <rect x="0" y="-122" width="46" height="122" rx="2" fill="#f4a261" stroke="#181818" stroke-width="2.5"/>
+            <text x="28" y="-55" fill="#181818" font-family="'Space Mono', monospace" font-size="11" font-weight="bold" transform="rotate(-90, 28, -55)">T: JEOIK</text>
+            <path d="M 8,-105 L 23,-90 L 38,-105" fill="none" stroke="#181818" stroke-width="2.5"/>
+            <path d="M 8,-25 L 23,-40 L 38,-25" fill="none" stroke="#181818" stroke-width="2.5"/>
+          </g>
+
+          <!-- Book 9: Deep red book "Books" with yellow badges -->
+          <g transform="translate(617, 146)">
+            <rect x="0" y="-120" width="36" height="120" rx="2" fill="#c0392b" stroke="#181818" stroke-width="2.5"/>
+            <line x1="9" y1="-120" x2="9" y2="0" stroke="#8c2317" stroke-width="2"/>
+            <circle cx="21" cy="-96" r="4.5" fill="#f1c40f" stroke="#181818" stroke-width="1"/>
+            <text x="25" y="-45" fill="#ffffff" font-family="'Space Mono', monospace" font-size="11" font-weight="bold" transform="rotate(-90, 25, -45)">Books</text>
+            <circle cx="21" cy="-22" r="4.5" fill="#f1c40f" stroke="#181818" stroke-width="1"/>
+          </g>
+
+          <!-- Book 10: Olive tan book with botanical pods -->
+          <g transform="translate(659, 146)">
+            <rect x="0" y="-130" width="38" height="130" rx="2" fill="#8b9467" stroke="#181818" stroke-width="2.5"/>
+            <path d="M 19,-28 L 19,-95" stroke="#3b421a" stroke-width="2.5"/>
+            <circle cx="19" cy="-84" r="5.5" fill="#d4a373" stroke="#181818" stroke-width="1.2"/>
+            <circle cx="19" cy="-62" r="5.5" fill="#d4a373" stroke="#181818" stroke-width="1.2"/>
+            <circle cx="19" cy="-40" r="5.5" fill="#d4a373" stroke="#181818" stroke-width="1.2"/>
+          </g>
+
+          <!-- Book 11: Slate cyan book "STORE LEGE" -->
+          <g transform="translate(703, 146)">
+            <rect x="0" y="-126" width="44" height="126" rx="2" fill="#588b8b" stroke="#181818" stroke-width="2.5"/>
+            <text x="24" y="-76" fill="#ffffff" font-family="'Space Mono', monospace" font-size="10.5" font-weight="bold" transform="rotate(-90, 24, -76)">STORE</text>
+            <text x="24" y="-36" fill="#ffffff" font-family="'Space Mono', monospace" font-size="10.5" font-weight="bold" transform="rotate(-90, 24, -36)">LEGE</text>
+            <circle cx="12" cy="-18" r="2" fill="#ffffff"/>
+            <circle cx="22" cy="-18" r="2" fill="#ffffff"/>
+            <circle cx="32" cy="-18" r="2" fill="#ffffff"/>
+          </g>
+
+          <!-- Book 12: Tall rust/red book "in luean" -->
+          <g transform="translate(753, 146)">
+            <rect x="0" y="-132" width="36" height="132" rx="2" fill="#d05a3f" stroke="#181818" stroke-width="2.5"/>
+            <text x="23" y="-40" fill="#ffffff" font-family="'Space Mono', monospace" font-size="11" font-style="italic" transform="rotate(-90, 23, -40)">in luean</text>
+            <line x1="0" y1="-110" x2="36" y2="-110" stroke="#f1faee" stroke-width="2"/>
+          </g>
+
+          <!-- ================= VINTAGE DESK LAMP ON RIGHT ================= -->
+          <g transform="translate(830, 146)">
+            <!-- Lamp base -->
+            <ellipse cx="30" cy="-4" rx="24" ry="5" fill="#8d5b4c" stroke="#181818" stroke-width="2.5"/>
+            <!-- Lamp neck -->
+            <path d="M 30,-7 L 40,-70 L 14,-105" fill="none" stroke="#8d5b4c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="40" cy="-70" r="6" fill="#d2a679" stroke="#181818" stroke-width="2"/>
+            <!-- Lamp cone shade -->
+            <path d="M -8,-124 L 36,-94 L 20,-80 Z" fill="#d95d39" stroke="#181818" stroke-width="2.5" stroke-linejoin="round"/>
+            <!-- Warm bulb glow polygon -->
+            <polygon points="2,-86 28,-78 18,-48 -8,-58" fill="#ffeaa7" opacity="0.35"/>
+          </g>
+
+          <!-- ================= HANGING POTHOS PLANT ON LEFT ================= -->
+          <g transform="translate(50, -10)">
+            <!-- Ceiling hanger ropes -->
+            <line x1="68" y1="10" x2="68" y2="48" stroke="#8b5a2b" stroke-width="2"/>
+            <line x1="112" y1="10" x2="112" y2="48" stroke="#8b5a2b" stroke-width="2"/>
+
+            <!-- Hanging Terracotta Pot -->
+            <path d="M 64,48 L 116,48 L 108,84 L 72,84 Z" fill="#d4a373" stroke="#181818" stroke-width="2.5"/>
+            <ellipse cx="90" cy="48" rx="26" ry="6" fill="#c49060" stroke="#181818" stroke-width="2"/>
+
+            <!-- Vine Stems cascading down over the shelf edge -->
+            <path d="M 75,76 Q 48,115 62,160 Q 72,198 56,225" fill="none" stroke="#2d6a4f" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 90,80 Q 115,120 102,170 Q 92,208 102,235" fill="none" stroke="#2d6a4f" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M 104,78 Q 140,110 134,152 Q 128,188 140,218" fill="none" stroke="#2d6a4f" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 65,70 Q 30,95 44,140 Q 52,170 34,195" fill="none" stroke="#2d6a4f" stroke-width="2.8" stroke-linecap="round"/>
+            <path d="M 112,74 Q 155,100 168,135 Q 174,165 160,190" fill="none" stroke="#2d6a4f" stroke-width="2.5" stroke-linecap="round"/>
+
+            <!-- Rich Heart-Shaped Pothos Leaves -->
+            <!-- Clustered around pot rim -->
+            <path d="M 52,48 Q 38,36 56,30 Q 68,42 52,48 Z" fill="#52b788" stroke="#181818" stroke-width="2"/>
+            <path d="M 78,42 Q 88,24 100,34 Q 96,52 78,42 Z" fill="#40916c" stroke="#181818" stroke-width="2"/>
+            <path d="M 108,46 Q 128,34 134,48 Q 118,58 108,46 Z" fill="#74c69d" stroke="#181818" stroke-width="2"/>
+
+            <!-- Cascading Vine 1 Leaves -->
+            <path d="M 58,95 Q 40,88 45,110 Q 60,110 58,95 Z" fill="#2d6a4f" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 65,125 Q 82,120 78,142 Q 62,140 65,125 Z" fill="#40916c" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 62,158 Q 44,154 50,176 Q 66,174 62,158 Z" fill="#52b788" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 70,188 Q 86,185 80,208 Q 68,205 70,188 Z" fill="#2d6a4f" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 58,218 Q 44,218 52,238 Q 64,234 58,218 Z" fill="#40916c" stroke="#181818" stroke-width="2.2"/>
+
+            <!-- Cascading Vine 2 Leaves -->
+            <path d="M 96,98 Q 114,94 110,116 Q 94,114 96,98 Z" fill="#52b788" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 106,132 Q 124,128 118,150 Q 104,148 106,132 Z" fill="#2d6a4f" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 98,168 Q 80,164 86,186 Q 102,184 98,168 Z" fill="#40916c" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 96,204 Q 114,200 108,222 Q 94,220 96,204 Z" fill="#52b788" stroke="#181818" stroke-width="2.2"/>
+
+            <!-- Cascading Vine 3 Leaves (Overlapping shelf edge) -->
+            <path d="M 124,106 Q 144,100 140,122 Q 124,122 124,106 Z" fill="#40916c" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 136,142 Q 154,138 150,160 Q 134,158 136,142 Z" fill="#52b788" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 132,178 Q 148,178 142,198 Q 128,196 132,178 Z" fill="#2d6a4f" stroke="#181818" stroke-width="2.2"/>
+
+            <!-- Cascading Vine 4 & 5 Leaves -->
+            <path d="M 40,108 Q 22,104 28,124 Q 42,124 40,108 Z" fill="#74c69d" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 46,145 Q 28,142 34,164 Q 48,162 46,145 Z" fill="#40916c" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 36,178 Q 18,178 24,196 Q 38,194 36,178 Z" fill="#2d6a4f" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 154,118 Q 172,114 168,136 Q 150,134 154,118 Z" fill="#52b788" stroke="#181818" stroke-width="2.2"/>
+            <path d="M 166,150 Q 182,148 176,168 Q 160,166 166,150 Z" fill="#2d6a4f" stroke="#181818" stroke-width="2.2"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Header Content Bottom Bar -->
+      <div class="header-body">
+        <div class="header-left">
+          <div class="header-badge-tag">
+            <span class="badge-icon">★</span> COMMUNITY LENDING &amp; READING ROOM
+          </div>
+          <h1 class="header-title">Library Management System</h1>
+          <div class="header-tagline-wrap">
+            <svg class="coral-squiggle" viewBox="0 0 60 14" width="60" height="14" aria-hidden="true">
+              <path d="M 2,7 C 8,2 14,12 20,7 C 26,2 32,12 38,7 C 44,2 50,12 56,7" fill="none" stroke="#e05338" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <p class="header-tagline">Every book has a story. We just keep track of where it went.</p>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="status-pill zine-online" id="system-status-indicator">
+            <span class="pulse-dot"></span>
+            <span class="status-text">ZINE ENGINE: ONLINE</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="main-nav-bar" aria-label="Main Navigation">
+      <div class="nav-segmented" role="tablist">
+        <button type="button" class="nav-tab active" id="nav-tab-dashboard" role="tab" aria-selected="true" aria-controls="view-dashboard">
+          📖 Catalog Dashboard
+        </button>
+        <button type="button" class="nav-tab" id="nav-tab-console" role="tab" aria-selected="false" aria-controls="view-console">
+          🔬 Data Structure Console
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Dashboard Grid -->
+    <main class="dashboard-grid" id="view-dashboard">
+      <!-- LEFT COLUMN: Search & Catalog -->
+      <section class="catalog-column">
+        <!-- Search Panel -->
+        <div class="search-panel neo-panel">
+          <div class="panel-header search-header">
+            <div class="panel-title-wrap">
+              <svg class="search-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/>
+                <line x1="21" y1="21" x2="16.5" y2="16.5"/>
+              </svg>
+              <h2 class="panel-title">Search Catalog</h2>
+            </div>
+            <!-- Segmented Pill Toggle -->
+            <div class="toggle-segmented" role="radiogroup" aria-label="Search filter mode">
+              <button type="button" class="segmented-btn active" id="btn-search-by-title" data-mode="title" aria-pressed="true">By Title</button>
+              <button type="button" class="segmented-btn" id="btn-search-by-id" data-mode="id" aria-pressed="false">By ID</button>
+            </div>
+          </div>
+
+          <div class="search-input-wrap">
+            <span class="input-icon-search" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/>
+                <line x1="21" y1="21" x2="16.5" y2="16.5"/>
+              </svg>
+            </span>
+            <input 
+              type="text" 
+              id="search-input" 
+              class="neo-input search-input" 
+              placeholder="Type to filter titles (e.g. Graphic Storytelling)..."
+              autocomplete="off"
+              aria-label="Search catalog books"
+            >
+            <button type="button" id="search-clear-btn" class="search-clear-btn hidden" aria-label="Clear search input">✕</button>
+          </div>
+        </div>
+
+        <!-- Books On Shelf Panel -->
+        <div class="shelf-panel neo-panel">
+          <div class="panel-header shelf-header">
+            <div class="shelf-title-wrap">
+              <span class="red-bullet" aria-hidden="true"></span>
+              <h2 class="panel-title">Books On Shelf</h2>
+            </div>
+            <div class="count-pill" id="shelf-count-badge">5 Books</div>
+          </div>
+
+          <!-- Book Cards Container -->
+          <div class="book-list" id="book-list" role="region" aria-live="polite">
+            <!-- Dynamic Book Cards will be rendered here by script.js -->
+          </div>
+
+          <!-- Empty search result state -->
+          <div id="no-books-state" class="empty-state hidden">
+            <div class="empty-state-icon">📚</div>
+            <p class="empty-state-title">No books match your search</p>
+            <p class="empty-state-desc">Try searching with a different title keyword or book ID.</p>
+            <button type="button" id="reset-search-btn" class="neo-btn btn-secondary">Reset Search Filter</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: Add Book, Queue, Returns -->
+      <aside class="sidebar-column">
+        <!-- Add a Book Panel -->
+        <div class="add-book-panel neo-panel accent-yellow">
+          <div class="sticker-tag sticker-notched sticker-top-right">NEW INTAKE</div>
+          <div class="panel-header add-header">
+            <h2 class="panel-title add-title">+ Add a Book</h2>
+          </div>
+          <p class="panel-instruction">Register a new volume into the catalog shelves with ink ID.</p>
+
+          <form id="add-book-form" class="add-book-form" novalidate>
+            <div class="form-row">
+              <div class="form-group form-group-sm">
+                <label for="book-id-input" class="neo-label">BOOK ID</label>
+                <input 
+                  type="text" 
+                  id="book-id-input" 
+                  class="neo-input text-upper" 
+                  placeholder="B-105" 
+                  required
+                  maxlength="10"
+                >
+              </div>
+              <div class="form-group form-group-lg">
+                <label for="book-title-input" class="neo-label">BOOK TITLE</label>
+                <input 
+                  type="text" 
+                  id="book-title-input" 
+                  class="neo-input" 
+                  placeholder="e.g. Indie Press Anthology" 
+                  required
+                >
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group form-group-lg">
+                <label for="book-author-input" class="neo-label">AUTHOR</label>
+                <input 
+                  type="text" 
+                  id="book-author-input" 
+                  class="neo-input" 
+                  placeholder="e.g. Ursula K. Le Guin" 
+                  required
+                >
+              </div>
+              <div class="form-group form-group-sm">
+                <label for="book-copies-input" class="neo-label">COPIES</label>
+                <input 
+                  type="number" 
+                  id="book-copies-input" 
+                  class="neo-input text-center" 
+                  placeholder="1" 
+                  value="1"
+                  min="1"
+                  max="99"
+                  required
+                >
+              </div>
+            </div>
+
+            <button type="submit" class="neo-btn btn-coral btn-submit-book" id="submit-book-btn">
+              + ADD BOOK
+            </button>
+          </form>
+        </div>
+
+        <!-- Waiting Queue Panel -->
+        <div class="waiting-queue-panel neo-panel accent-pink">
+          <div class="sticker-tag sticker-notched sticker-top-left">FIFO WAITLIST</div>
+          <div class="panel-header queue-header">
+            <div class="queue-title-wrap">
+              <svg class="queue-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <h2 class="panel-title">Waiting Queue</h2>
+            </div>
+            <div class="count-pill pill-subtle" id="queue-count-badge">2 Enqueued</div>
+          </div>
+
+          <!-- Serve Next Student Action Button -->
+          <button type="button" class="neo-btn btn-mustard btn-serve-next" id="serve-next-btn">
+            <span class="btn-check-icon">✓</span> SERVE NEXT STUDENT
+          </button>
+
+          <!-- Queue List -->
+          <div class="queue-list" id="queue-list" role="list">
+            <!-- Rendered by script.js -->
+          </div>
+        </div>
+
+        <!-- Recently Returned Panel -->
+        <div class="recent-returns-panel neo-panel accent-teal">
+          <div class="panel-header returns-header">
+            <div class="returns-title-wrap">
+              <span class="currency-glyph" aria-hidden="true">$</span>
+              <h2 class="panel-title text-white">Recently Returned</h2>
+            </div>
+            <div class="count-pill pill-subtle-white" id="returns-count-badge">2 in Stack</div>
+          </div>
+          <p class="panel-instruction text-cream-mono">
+            LIFO Return Stack — latest dropped books stacked on top.
+          </p>
+
+          <!-- Stack List -->
+          <div class="returns-list" id="returns-list" role="list">
+            <!-- Rendered by script.js -->
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Data Structure Console View -->
+    <section id="view-console" class="console-view hidden" aria-labelledby="console-main-title">
+      <div class="console-header-card neo-panel">
+        <div class="console-header-left">
+          <div class="header-badge-tag"><span class="badge-icon">🔬</span> IN-MEMORY C++ INSPECTOR</div>
+          <h2 id="console-main-title" class="console-title">Data Structure Console</h2>
+          <p class="console-desc">
+            Visual inspection of LibTrack's four custom C++ dynamically allocated data structures.
+            Real-time traversal and node memory layout directly synchronized with the in-memory backend.
+          </p>
+        </div>
+        <div class="console-header-right">
+          <button type="button" id="btn-refresh-console" class="neo-btn btn-secondary">
+            ↻ Refresh State
+          </button>
+        </div>
+      </div>
+
+      <!-- Data Structure Selectable Tabs -->
+      <div class="ds-tab-bar" role="tablist" aria-label="Data Structure Tabs">
+        <button type="button" class="ds-tab active" data-ds="list" id="ds-tab-list" role="tab" aria-selected="true">
+          🔗 Singly Linked List
+        </button>
+        <button type="button" class="ds-tab" data-ds="queue" id="ds-tab-queue" role="tab" aria-selected="false">
+          👥 FIFO Queue
+        </button>
+        <button type="button" class="ds-tab" data-ds="stack" id="ds-tab-stack" role="tab" aria-selected="false">
+          📚 LIFO Stack
+        </button>
+        <button type="button" class="ds-tab" data-ds="bst" id="ds-tab-bst" role="tab" aria-selected="false">
+          🌳 Binary Search Tree
+        </button>
+      </div>
+
+      <!-- Structure View Panels -->
+      <div id="ds-content-area" class="ds-content-area">
+        <!-- Rendered dynamically by script.js based on selected tab -->
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-left">
+        <span class="footer-bullet">•</span> Athenaeum Hand-Printed Library Log
+      </div>
+      <div class="footer-right">
+        Designed with warm paper, bold ink outlines, and zero gradients.
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal Dialog for Borrow / Return / Waiting Queue -->
+  <div id="action-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="neo-panel modal-card">
+      <div class="panel-header modal-header">
+        <h3 id="modal-title" class="panel-title">Borrow Book</h3>
+        <button type="button" id="modal-close-btn" class="modal-close-btn" aria-label="Close dialog">✕</button>
+      </div>
+      <form id="modal-form" class="modal-form" novalidate>
+        <div id="modal-book-banner" class="modal-book-banner"></div>
+        <div id="modal-fields" class="modal-fields"></div>
+        <div class="modal-actions">
+          <button type="submit" id="modal-submit-btn" class="neo-btn btn-coral">Confirm</button>
+          <button type="button" id="modal-cancel-btn" class="neo-btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Accessible Toast Feedback Container -->
+  <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
