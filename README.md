@@ -1,6 +1,6 @@
 # LibTrack — Library Management System & Visual DSA Console
 
-LibTrack is a responsive Library Management System built as a college Data Structures & Algorithms (DSA) mini project. It pairs a retro editorial, hand-printed paper aesthetic (thick black ink borders, warm cream paper, offset drop shadows, zero gradients) with custom, dynamically allocated C++ data structures exposed via a minimal HTTP REST API.
+LibTrack is a responsive Library Management System built as a college Data Structures & Algorithms (DSA) mini project. It pairs a retro editorial, hand-printed paper aesthetic (thick black ink borders, warm cream paper, offset drop shadows, zero gradients) with four custom data structures implemented from scratch in JavaScript and served via a minimal Node.js Express REST API.
 
 ---
 
@@ -23,25 +23,26 @@ LibTrack simulates a community lending and reading room. It models real-world li
   - CSS3 (custom CSS variables, responsive CSS Grid / Flexbox, ink outlines, offset shadows)
   - Vanilla JavaScript (ES2020+, `fetch()` REST API client, zero frontend frameworks)
 - **Backend**:
-  - C++17 (`g++ -std=c++17 -Wall -Wextra -O2`)
-  - POSIX sockets HTTP server with chunked header/body parsing
-  - Zero external third-party C++ libraries or frameworks (pure standard C++ runtime)
+  - Node.js (v18+)
+  - Express (^5.0.0)
+  - Zero third-party data structure libraries (all four core structures built from scratch)
 - **Testing**:
-  - Direct C++ memory test runner (`tests/test_dsa.cpp`)
-  - Python test suites (`tests/test_api.py`, `tests/test_workflow.py`)
+  - Direct JavaScript DSA unit test runner (`tests/test_dsa.js`)
+  - Integration and edge cases suite (`tests/test_api.py`)
+  - Complete 10-step user workflow test suite (`tests/test_workflow.py`)
 
 ---
 
 ## 3. Four Core Data Structures & Their Roles
 
-All data structures are implemented from scratch using custom C++ classes and dynamically allocated nodes (no `std::list`, `std::queue`, `std::stack`, or `std::map`):
+All data structures are implemented from scratch using custom node classes and object references (no built-in `Array`, `Map`, or `Set` used as data store substitutes):
 
 | Data Structure | Implementation File | LibTrack Application Role | Operations & Time Complexity |
 | :--- | :--- | :--- | :--- |
-| **Singly Linked List** (`BookLinkedList`) | [`backend/DataStructures.h`](file:///home/antooswald/Projects/Library-Management-System/backend/DataStructures.h#L78-L187) | Primary store for book inventory records. Maintains `head` and `tail` pointers. | `insertBack` $O(1)$, `insertFront` $O(1)$, `remove` $O(n)$, `find` $O(n)$, `traverse` $O(n)$. |
-| **Queue** (`RequestQueue`) | [`backend/DataStructures.h`](file:///home/antooswald/Projects/Library-Management-System/backend/DataStructures.h#L193-L294) | FIFO waiting list for student loan requests when all copies of a title are checked out. | `enqueue` $O(1)$, `dequeue` $O(1)$, `peek` $O(1)$, `dequeueFirstMatching` $O(n)$. |
-| **Stack** (`ReturnStack`) | [`backend/DataStructures.h`](file:///home/antooswald/Projects/Library-Management-System/backend/DataStructures.h#L300-L362) | LIFO physical return tray tracking recently returned books (newest drop on top). | `push` $O(1)$, `pop` $O(1)$, `peek` $O(1)$, `traverse` $O(n)$. |
-| **Binary Search Tree** (`BookBST`) | [`backend/DataStructures.h`](file:///home/antooswald/Projects/Library-Management-System/backend/DataStructures.h#L368-L509) | Secondary index by unique `bookId` for fast search and duplicate prevention. | `search` $O(h)$, `insert` $O(h)$, `remove` $O(h)$ (leaf, 1-child, 2-children successor swap), `inorder` $O(n)$. |
+| **Singly Linked List** (`BookLinkedList`) | [`backend/dataStructures.js`](file:///home/antooswald/Projects/Library-Management-System/backend/dataStructures.js#L11-L157) | Primary store for book inventory records. Maintains `head` and `tail` pointers. | `insertBack` $O(1)$, `insertFront` $O(1)$, `remove` $O(n)$, `find` $O(n)$, `findByTitle` $O(n)$, `traverse` $O(n)$. |
+| **Queue** (`RequestQueue`) | [`backend/dataStructures.js`](file:///home/antooswald/Projects/Library-Management-System/backend/dataStructures.js#L163-L270) | FIFO waiting list for student loan requests when all copies of a title are checked out. | `enqueue` $O(1)$, `dequeue` $O(1)$, `peek` $O(1)$, `dequeueFirstMatching` $O(n)$, `traverse` $O(n)$. |
+| **Stack** (`ReturnStack`) | [`backend/dataStructures.js`](file:///home/antooswald/Projects/Library-Management-System/backend/dataStructures.js#L276-L352) | LIFO physical return tray tracking recently returned books (newest drop on top). | `push` $O(1)$, `pop` $O(1)$, `peek` $O(1)$, `traverse` $O(n)$. |
+| **Binary Search Tree** (`BookBST`) | [`backend/dataStructures.js`](file:///home/antooswald/Projects/Library-Management-System/backend/dataStructures.js#L358-L502) | Secondary index by unique `bookId` for fast search and duplicate prevention. | `search` $O(h)$, `insert` $O(h)$, `remove` $O(h)$ (leaf, 1-child, 2-children successor swap), `inorder` $O(n)$, `getTreeJson` $O(n)$. |
 
 ---
 
@@ -64,53 +65,47 @@ All data structures are implemented from scratch using custom C++ classes and dy
 
 ---
 
-## 5. Prerequisites & Dependencies
+## 5. Prerequisites & Installation
 
-- **Operating System**: Linux / macOS (POSIX-compatible OS with socket API).
-- **C++ Compiler**: GCC (g++ $\ge$ 7.0) or Clang supporting C++17.
-- **Build Utility**: GNU Make.
-- **Python**: Python 3.6+ (standard library only; used for automated test suites).
+- **Node.js**: v18.0.0 or higher.
+- **npm**: v8.0.0 or higher.
 
-No external npm packages, pip packages, or third-party libraries are required.
+Install the single backend dependency (Express):
+```bash
+npm install
+```
 
 ---
 
-## 6. Build and Run Commands
+## 6. Run the Application
 
-### Compile the Backend
+Start the server using npm or node:
+
 ```bash
-make clean && make
+npm start
 ```
+*(or `node backend/server.js 8080` or `make run`)*
 
-### Start the Server
-```bash
-./libtrack_server 8080
-```
-*The server will start listening on `http://localhost:8080` (or another port if specified as an argument).*
-
-### Open the Application
-Open your web browser and navigate to:
-```
-http://localhost:8080
-```
+Then open your browser to:
+👉 **[http://localhost:8080](http://localhost:8080)**
 
 ---
 
 ## 7. Testing Instructions
 
-Run the complete verification suite with a single command:
+Run the complete test suite with a single command:
 ```bash
-make test
+npm test
 ```
 
-This runs three automated test suites:
-1. **Low-Level C++ DSA Unit Tests (`tests/test_dsa.cpp`)**:
-   - `BookLinkedList`: Insertion (`insertBack`, `insertFront`), node traversal, deletion (head, tail, middle), boundary safety.
-   - `RequestQueue`: FIFO order, peek, empty handling, predicate matching (`dequeueFirstMatching`).
+This executes:
+1. **JavaScript DSA Unit Tests (`tests/test_dsa.js`)**:
+   - `BookLinkedList`: Insertion, deletion (head, tail, middle), lookups, empty states.
+   - `RequestQueue`: FIFO ordering, peek, dequeue matching predicate.
    - `ReturnStack`: LIFO ordering, top peek, popping empty stack.
-   - `BookBST`: Leaf node deletion, 1-child node deletion, 2-children node deletion (in-order successor replacement), root node deletion, and strictly sorted in-order traversal.
+   - `BookBST`: Leaf node deletion, 1-child node deletion, 2-children node deletion (in-order successor replacement), root node deletion, sorted in-order traversal, tree JSON hierarchy.
 2. **REST API & Edge Cases Suite (`tests/test_api.py`)**:
-   - 25 automated assertions verifying static asset serving, CRUD operations, duplicate book prevention, borrowing/returning, auto-waitlist allocation, and delete safety locks.
+   - 24 automated assertions verifying static asset serving, CRUD operations, duplicate prevention, borrowing/returning, auto-waitlist allocation, and delete safety locks.
 3. **End-to-End User Workflow Suite (`tests/test_workflow.py`)**:
    - 10 full user workflows asserting state across inventory, queue, stack, console inspection, and clean restart memory initialization.
 
@@ -127,5 +122,4 @@ This runs three automated test suites:
 
 ## 9. Current Limitations
 
-- **In-Memory Storage**: LibTrack maintains all data structures in memory during server execution. Restarting the server resets the catalog and queues to their initial default seeded state. Persistence (e.g. SQLite or flat-file serialization) has intentionally not been included per project scope.
-
+- **In-Memory Storage**: LibTrack maintains all data structures in memory during server execution. Restarting the server resets the catalog and queues to a clean initial empty state. Persistence (e.g. SQLite or flat-file serialization) has intentionally not been included per project scope.

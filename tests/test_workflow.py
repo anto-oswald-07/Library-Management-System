@@ -26,8 +26,8 @@ def run_workflow_test():
     print("=" * 60)
 
     # Start fresh server on 8081 for this test
-    server = subprocess.Popen(["./libtrack_server", "8081"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    time.sleep(0.5)
+    server = subprocess.Popen(["node", "backend/server.js", "8081"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    time.sleep(0.8)
 
     def req(path, method="GET", data=None):
         url = f"http://127.0.0.1:8081{path}"
@@ -153,8 +153,8 @@ def run_workflow_test():
 
     # Scenario 10: Restart the backend and verify expected behavior for current storage model
     print("[TEST] Restarting server to verify clean in-memory storage state (zero dummy data)...")
-    server2 = subprocess.Popen(["./libtrack_server", "8082"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    time.sleep(0.5)
+    server2 = subprocess.Popen(["node", "backend/server.js", "8082"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    time.sleep(0.8)
     try:
         def req2(path):
             with urllib.request.urlopen(f"http://127.0.0.1:8082{path}", timeout=3) as res:

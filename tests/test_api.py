@@ -19,9 +19,9 @@ import json
 import sys
 
 def run_tests():
-    print("[TEST] Starting LibTrack C++ Server...")
-    server = subprocess.Popen(["./libtrack_server", "8080"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    time.sleep(0.5)
+    print("[TEST] Starting LibTrack Node.js Server...")
+    server = subprocess.Popen(["node", "backend/server.js", "8080"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    time.sleep(0.8)
 
     def request(path, method="GET", data=None):
         url = f"http://127.0.0.1:8080{path}"

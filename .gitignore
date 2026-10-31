@@ -2,4 +2,5 @@
 libtrack_server
 tests/test_dsa
 .DS_Store
+node_modules
 

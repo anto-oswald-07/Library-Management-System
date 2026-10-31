@@ -1,0 +1,27 @@
+{
+  "name": "library-management-system",
+  "version": "1.0.0",
+  "description": "LibTrack is a responsive Library Management System built as a college Data Structures & Algorithms (DSA) mini project. It pairs a retro editorial, hand-printed paper aesthetic (thick black ink borders, warm cream paper, offset drop shadows, zero gradients) with custom, dynamically allocated C++ data structures exposed via a minimal HTTP REST API.",
+  "main": "script.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "node backend/server.js",
+    "test": "node tests/test_dsa.js && python3 tests/test_api.py && python3 tests/test_workflow.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anto-oswald-07/Library-Management-System.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anto-oswald-07/Library-Management-System/issues"
+  },
+  "homepage": "https://github.com/anto-oswald-07/Library-Management-System#readme",
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}
